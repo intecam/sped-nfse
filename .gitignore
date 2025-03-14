@@ -1,14 +1,2 @@
-.settings
-.buildpath
-.project
-.idea
-nbproject
-local
-vendor
-docs
-build
-*~
-certs/*.pfx
-certs/*.pem
-config/*.json
+vendor/
 composer.lock

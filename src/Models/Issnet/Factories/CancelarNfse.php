@@ -16,23 +16,21 @@ class CancelarNfse extends Factory
         $method = "CancelarNfseEnvio";
         $xsd = 'servico_cancelar_nfse_envio';
 
-        $content = "<p1:" . $method . " "
-            . "xmlns:p1=\"http://www.issnetonline.com.br/webserviceabrasf/vsd/$xsd.xsd\" "
-            . "xmlns:tc=\"http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_complexos.xsd\" "
-            . "xmlns:ts=\"http://www.issnetonline.com.br/webserviceabrasf/vsd/tipos_simples.xsd\""
-            . ">";
+        $content = '<CancelarNfseEnvio xmlns="http://www.abrasf.org.br/nfse.xsd">';
         $content .= "<Pedido>";
-        $content .= "<tc:InfPedidoCancelamento>";
-        $content .= "<tc:IdentificacaoNfse>";
-        $content .= "<tc:Numero>$numero</tc:Numero>";
-        $content .= "<tc:Cnpj>$remetenteCNPJCPF</tc:Cnpj>";
-        $content .= "<tc:InscricaoMunicipal>$remetenteIM</tc:InscricaoMunicipal>";
-        $content .= "<tc:CodigoMunicipio>$codigoMunicipio</tc:CodigoMunicipio>";
-        $content .= "</tc:IdentificacaoNfse>";
-        $content .= "<tc:CodigoCancelamento>$codigoCancelamento</tc:CodigoCancelamento>";
-        $content .= "</tc:InfPedidoCancelamento>";
+        $content .= "<InfPedidoCancelamento>";
+        $content .= "<IdentificacaoNfse>";
+        $content .= "<Numero>$numero</Numero>";
+        $content .= "<CpfCnpj>";
+        $content .= "<Cnpj>$remetenteCNPJCPF</Cnpj>";
+        $content .= "</CpfCnpj>";
+        $content .= "<InscricaoMunicipal>$remetenteIM</InscricaoMunicipal>";
+        $content .= "<CodigoMunicipio>$codigoMunicipio</CodigoMunicipio>";
+        $content .= "</IdentificacaoNfse>";
+        $content .= "<CodigoCancelamento>$codigoCancelamento</CodigoCancelamento>";
+        $content .= "</InfPedidoCancelamento>";
         $content .= "</Pedido>";
-        $content .= "</p1:CancelarNfseEnvio>";
+        $content .= "</CancelarNfseEnvio>";
 
         $body = Signer::sign(
             $this->certificate,
@@ -43,8 +41,26 @@ class CancelarNfse extends Factory
             [false, false, null, null],
             'Pedido'
         );
+
         $body = $this->clear($body);
-        $this->validar($versao, $body, 'Issnet', $xsd, '');
-        return $body;
+
+
+        $xml = '<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:nfse="http://nfse.abrasf.org.br">';
+        $xml .= '<soapenv:Header/>';
+        $xml .= '<soapenv:Body>';
+        $xml .= '<nfse:CancelarNfse>';
+        $xml .= '<nfseCabecMsg>';
+        $xml .= '<cabecalho xmlns="http://www.abrasf.org.br/nfse.xsd" versao="2.04">';
+        $xml .= '<versaoDados>2.04</versaoDados>';
+        $xml .= '</cabecalho>';
+        $xml .= '</nfseCabecMsg>';
+        $xml .= '<nfseDadosMsg>';
+        $xml .= $body;
+        $xml .= '</nfseDadosMsg>';
+        $xml .= '</nfse:CancelarNfse>';
+        $xml .= '</soapenv:Body>';
+        $xml .= '</soapenv:Envelope>';
+
+        return $xml;
     }
 }
